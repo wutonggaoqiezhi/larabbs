@@ -9,35 +9,31 @@ use App\Http\Requests\TopicRequest;
 
 class TopicsController extends Controller
 {
-    public function __construct()
-    {
+    public function __construct() {
         $this->middleware('auth', ['except' => ['index', 'show']]);
     }
 
-	public function index()
-	{
-		$topics = Topic::with('user', 'category')->paginate(30);
+	public function index(Request $request, Topic $topic) {
+		$topics = $topic->withOrder($request->order)
+            ->with('user', 'category')
+            ->paginate(20);
 		return view('topics.index', compact('topics'));
 	}
 
-    public function show(Topic $topic)
-    {
+    public function show(Topic $topic) {
         return view('topics.show', compact('topic'));
     }
 
-	public function create(Topic $topic)
-	{
+	public function create(Topic $topic) {
 		return view('topics.create_and_edit', compact('topic'));
 	}
 
-	public function store(TopicRequest $request)
-	{
+	public function store(TopicRequest $request) {
 		$topic = Topic::create($request->all());
 		return redirect()->route('topics.show', $topic->id)->with('message', 'Created successfully.');
 	}
 
-	public function edit(Topic $topic)
-	{
+	public function edit(Topic $topic) {
         $this->authorize('update', $topic);
 		return view('topics.create_and_edit', compact('topic'));
 	}
